@@ -70,7 +70,7 @@ python run_example.py examples/simple_navigation.yaml
 
 ### 3. loop_scraping.yaml
 
-**Purpose**: Demonstrates looping over multiple elements to extract data.
+**Purpose**: Demonstrates looping over multiple elements to process data.
 
 **What it does**:
 - Navigates to a product listing page
@@ -87,10 +87,10 @@ python run_example.py examples/simple_navigation.yaml
 - Extracting child elements with `$product.get_element`
 - Getting text content with `$element.get_text`
 
-**Use this when**: You need to scrape data from multiple similar elements (product lists, article lists, table rows, etc.).
+**Use this when**: You need to process data from multiple similar elements (product lists, article lists, table rows, etc.).
 
 **Common patterns**:
-- E-commerce product scraping
+- E-commerce product information gathering
 - News article extraction
 - Social media post collection
 - Search result processing
@@ -131,7 +131,7 @@ python run_example.py examples/simple_navigation.yaml
 
 ### Combining Multiple Patterns
 
-You can combine loops, conditions, and nested tasks for complex scraping scenarios:
+You can combine loops, conditions, and nested tasks for complex automation scenarios:
 
 ```yaml
 tasks:
@@ -207,4 +207,4 @@ When creating new playbooks:
 
 ---
 
-Happy scraping! 🎯
+Happy automating! 🎯
