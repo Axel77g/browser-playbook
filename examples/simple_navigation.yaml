@@ -1,0 +1,9 @@
+tasks:
+  - name: Go to GitHub
+    action: browser.goto
+    url: https://github.com
+    output: page
+  
+  - name: Wait for page load
+    action: wait
+    duration: 2

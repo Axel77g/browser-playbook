@@ -1,0 +1,31 @@
+tasks:
+  - name: Navigate to product page
+    action: browser.goto
+    url: https://example.com/products
+  
+  - name: Get all product cards
+    action: dom.get_elements
+    selector: ".product-card"
+    output: products
+  
+  - name: Extract product data
+    map: products
+    item_name: product
+    tasks:
+      - name: Get product title
+        action: $product.get_element
+        selector: ".title"
+        output: title_element
+      
+      - name: Extract title text
+        action: $title_element.get_text
+        output: product_title
+      
+      - name: Get product price
+        action: $product.get_element
+        selector: ".price"
+        output: price_element
+      
+      - name: Extract price
+        action: $price_element.get_text
+        output: product_price

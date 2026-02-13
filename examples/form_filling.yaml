@@ -1,0 +1,36 @@
+tasks:
+  - name: Navigate to login page
+    action: browser.goto
+    url: https://example.com/login
+  
+  - name: Find username field
+    action: dom.get_element
+    selector: "#username"
+    output: username_field
+  
+  - name: Click username field
+    action: $username_field.click
+  
+  - name: Type username
+    action: keyboard.type
+    text: "myuser"
+  
+  - name: Find password field
+    action: dom.get_element
+    selector: "#password"
+    output: password_field
+  
+  - name: Click password field
+    action: $password_field.click
+  
+  - name: Type password
+    action: keyboard.type
+    text: "mypassword"
+  
+  - name: Find submit button
+    action: dom.get_element
+    selector: "button[type='submit']"
+    output: submit_btn
+  
+  - name: Submit form
+    action: $submit_btn.click
