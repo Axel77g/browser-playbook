@@ -3,7 +3,9 @@
 > A browser-agnostic web scraping framework inspired by Ansible
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python](https://img.shields.io/badge/python-3.x-blue.svg)](https://www.python.org/)
+[![Python 3.x](https://img.shields.io/badge/Python-3.x-3776AB?style=flat&logo=python&logoColor=white)](https://www.python.org/)
+[![Selenium](https://img.shields.io/badge/Selenium-43B02A?style=flat&logo=selenium&logoColor=white)](https://www.selenium.dev/)
+[![YAML](https://img.shields.io/badge/YAML-Data%20Format-CB171E?style=flat&logo=yaml&logoColor=white)](https://yaml.org/)
 
 ## Introduction
 
