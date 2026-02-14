@@ -2,6 +2,7 @@ from enum import Enum
 import logging
 from typing import Any
 
+from scrapping_playbook_framework.core.post_processor import PostProcessorFactory
 from scrapping_playbook_framework.lib.chronos import Chronos
 from scrapping_playbook_framework.playbook_reader import PlaybookDict, PlaybookTask, PlaybookTask_ATTRIBUTES
 from scrapping_playbook_framework.task.task import ScrappingTask
@@ -66,7 +67,7 @@ class Worker:
     def __init__(self, playbook_dict: PlaybookDict, engine: WorkerEngine):
         self.playbook_dict = playbook_dict
         self.engine = engine
-        self.context = ExecutionContext()
+        self.context = ExecutionContext().inject_variables(self.playbook_dict.config)
         
     def get_strategy(self) -> WorkerStrategy:
         strategy_class = strategies.get(self.engine)
@@ -76,12 +77,28 @@ class Worker:
     
     def start(self) -> dict[str, Any]:
         strategy = self.get_strategy()
-
+        
         def replace_variable_placeholders(params: dict[str, Any], context: ExecutionContext) -> dict[str, Any]:
             for key, value in params.items():
                 if isinstance(value, str) and value.startswith("$"):
-                    variable_name = value[1:]
+                    variable_path = value[1:]
+                    parts = variable_path.split('.')
+                    variable_name = parts[0]
                     variable_value = context.get_variable(variable_name)
+                    """
+                    Can handle variables with a simple "." path like "variable.property" with depth of 1, usefull tu acces return by iterate task
+                    """
+                    if variable_value is not None and len(parts) > 1:
+                        for part in parts[1:]:
+                            if hasattr(variable_value, part): # type: ignore
+                                variable_value = getattr(variable_value, part) # type: ignore
+                            elif isinstance(variable_value, dict) and part in variable_value:
+                                variable_value = variable_value[part] # type: ignore
+                            else:
+                                logging.warning(f"Could not resolve {part} in {variable_path}")
+                                variable_value = None
+                                break
+
                     if variable_value is not None:
                         params[key] = variable_value
                     else:
@@ -89,19 +106,29 @@ class Worker:
 
             return params
     
+        def apply_post_processors(value: Any, processors_config: list[dict[str, Any]]) -> Any:
+            """Apply a chain of post-processors to a value"""
+            result = value
+            for processor_config in processors_config:
+                processor = PostProcessorFactory.create(processor_config)
+                result = processor.process(result)
+            
+            return result
 
         
         def worker_loop(tasks_to_execute : list[PlaybookTask], context: ExecutionContext, tasks_availables_dict : dict[str, ScrappingTask[Any]]) -> dict[str, Any]:
+            
             global need_break
             outputs : dict[str, Any] = {}
             
             for task_dict in tasks_to_execute:
                 with Chronos() as chrono:
+                    logging.info(f"Starting task {task_dict.name}")
                     task_name = task_dict.name
                     task_action = task_dict.action
                     task_conditions = task_dict.when or []
                     #if need_break:
-                        #breakpoint()
+                    #    breakpoint()
                     # Update the context with task variables
                     params = {k: v for k, v in task_dict.model_dump().items() if k not in PlaybookTask_ATTRIBUTES}
                     params = replace_variable_placeholders(params, context)
@@ -114,29 +141,39 @@ class Worker:
                         continue
                     
                     output = None
+                    
                     if task_dict.map is not None and task_dict.tasks is not None:
                         list_to_map = context.get_variable(task_dict.map)
+
                         if not isinstance(list_to_map, list):
                             raise ValueError(f"Variable to map is not a list: {task_dict.map}")
-                        logging.info(f"Mapping over list: {len(list_to_map)} items for task {task_name}") # type: ignore
+                        logging.debug(f"Mapping over list: {len(list_to_map)} items for task {task_name}") # type: ignore
                         output= []
-                        need_break = True
-                        for item in list_to_map: # type: ignore
+                        #need_break = task_dict.name == 'loop-on-links'
+                        for index, item in enumerate(list_to_map): # type: ignore
                             sub_context = context.clone()
+                            sub_context.set_variable('INDEX',index)
                             sub_context.set_variable(task_dict.item_name or "item", item)
+                            if(task_dict.filters is not None):
+                                if not all(f.evaluate(sub_context) for f in task_dict.filters):
+                                    continue
+
                             outputs_from_sub = worker_loop(task_dict.tasks, sub_context, tasks_availables_dict)
                             output.append(outputs_from_sub) # type: ignore
                     else :  
-                        logging.info(f"Invoking task {task_name} with action {task_action}")
-                        logging.info('value de attribute_name: ' + str(context.get_variable('attribute_name')))
+                        logging.debug(f"Invoking task {task_name} with action {task_action}")
                         invoker = TaskInvoker(task_name, task_action, context, tasks_availables_dict)
                         output = invoker()
 
-                    task_output = task_dict.output
-                    if task_output and output is not None:
-                        context.set_variable(task_output, output)
-                        if(not task_output.startswith('_')):
-                            outputs[task_output] = output
+
+                    if task_dict.post_process is not None and output is not None:
+                        output = apply_post_processors(output, task_dict.post_process)
+                    logging.info(f"Task {task_name} output: {output}")
+                    task_output_var_name = task_dict.output
+                    if task_output_var_name and output is not None:
+                        context.set_variable(task_output_var_name, output)
+                        if(not task_output_var_name.startswith('_')):
+                            outputs[task_output_var_name] = output
 
                 logging.info(f"Finished task {task_name} in {chrono.elapsed_time:.2f}s")
 
