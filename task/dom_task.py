@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Any, Optional, TypedDict
 
 from scrapping_playbook_framework.position import Position
+from scrapping_playbook_framework.task.browser_task import ScreenshotParams
 from scrapping_playbook_framework.task.task import ScrappingTask
 
 class DOMElementGetAttributeParams(TypedDict):
@@ -24,6 +25,9 @@ class DOMElement(ABC):
     def click(self, ctx: Any) -> None:
         pass
 
+    def getInView(self, ctx: Any) -> None:
+        pass
+
     @abstractmethod
     def get_element(self, ctx: 'SelectorParams') -> Optional['DOMElement']:
         pass
@@ -33,6 +37,10 @@ class DOMElement(ABC):
 
     @abstractmethod
     def get_shadow_root(self, ctx: Any) -> Optional['DOMElement']:
+        pass
+
+    @abstractmethod
+    def screenshot(self, ctx: ScreenshotParams) -> None:
         pass
 
 class SelectorParams(TypedDict):

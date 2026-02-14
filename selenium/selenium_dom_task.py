@@ -1,8 +1,10 @@
 from abc import ABC, abstractmethod
+import os
 from typing import Any, Optional
 from scrapping_playbook_framework.position import Position
+from scrapping_playbook_framework.task.browser_task import ScreenshotParams
 from scrapping_playbook_framework.task.dom_task import DOMElement, DOMElementGetAttributeParams, GetElementTask, GetElementsTask, SelectorParams
-
+from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By,ByType
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.remote.webelement import WebElement
@@ -44,6 +46,24 @@ class SeleniumDOMElement(DOMElement):
         # Selenium does not support shadow DOM natively
         dom = self.web_driver.execute_script("return arguments[0].shadowRoot", self.web_element) # type: ignore
         return SeleniumDOMElement(self.web_driver, dom)
+    
+    def getInView(self, ctx: Any) -> None:
+        # si webelement is ShadowRoot ignore
+        if isinstance(self.web_element, ShadowRoot):
+            return
+        ActionChains(self.web_driver).scroll_to_element(self.web_element)
+
+    def screenshot(self, ctx: ScreenshotParams) -> None:
+        if isinstance(self.web_element, ShadowRoot):
+            return
+        path = ctx['path']
+        directory = os.path.dirname(path)
+        if directory:
+            os.makedirs(directory, exist_ok=True)
+        
+        if not self.web_element.screenshot(ctx.get('path')): # type:ignore
+            raise Exception(f"Could not save screenshot to {path}")
+        
 
 class SeleniumElementFinder(ABC):
     @abstractmethod

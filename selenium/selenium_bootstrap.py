@@ -1,9 +1,11 @@
 from typing import Any
-from scrapping_playbook_framework.selenium.selenium_browser import SeleniumGoToTask
+from scrapping_playbook_framework.selenium.selenium_browser import SeleniumGoBackTask, SeleniumGoToTask, SeleniumScreenshotTask
 from scrapping_playbook_framework.selenium.selenium_click_task import SeleniumClickTask
 from scrapping_playbook_framework.selenium.selenium_dom_task import SeleniumGetElementTask, SeleniumGetElementsTask, WebDriverElementFinder
 from scrapping_playbook_framework.selenium.selenium_keyboard_task import SeleniumKeyboardPressTask, SeleniumKeyboardTypeTask
-from scrapping_playbook_framework.selenium.selenium_wait_task import SeleniumWaitTask
+from scrapping_playbook_framework.selenium.selenium_scroll_task import SeleniumScrollTask
+from scrapping_playbook_framework.selenium.selenium_wait_task import SeleniumWaitForElementTask, SeleniumWaitTask
+from scrapping_playbook_framework.task.browser_task import DownloadUrl
 from scrapping_playbook_framework.task.task import ScrappingTask
 from selenium.webdriver.chrome.options import Options
 from selenium import webdriver
@@ -56,11 +58,15 @@ def get_selenium_tasks(driver: WebDriver) -> list[ScrappingTask[Any]]:
 
     return [
         SeleniumGoToTask(driver),
-        SeleniumClickTask(driver),
+        SeleniumGoBackTask(driver),
+        SeleniumClickTask(driver), # type: ignore
         _keyboard_press_task,
         _wait_task,
         _get_element_task,
         SeleniumGetElementsTask(driver,WebDriverElementFinder(driver)),
         SeleniumKeyboardTypeTask(driver, _keyboard_press_task),
-        WaitForElementTask(_get_element_task,_wait_task),
+        SeleniumWaitForElementTask(driver, _get_element_task),
+        SeleniumScrollTask(driver),
+        SeleniumScreenshotTask(driver),
+        DownloadUrl()
     ]
