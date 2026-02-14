@@ -1,6 +1,6 @@
 # Scrapping Playbook Framework
 
-> A browser-agnostic web scraping framework inspired by Ansible
+> A browser-agnostic browser automation framework inspired by Ansible
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.x](https://img.shields.io/badge/Python-3.x-3776AB?style=flat&logo=python&logoColor=white)](https://www.python.org/)
@@ -9,15 +9,15 @@
 
 ## Introduction
 
-Scrapping Playbook Framework is a powerful, declarative web scraping framework that lets you define your scraping tasks using simple YAML playbooks—just like Ansible. Say goodbye to writing repetitive boilerplate code for Selenium or Playwright. Instead, focus on **what** you want to scrape, not **how** to code it.
+Scrapping Playbook Framework is a powerful, declarative browser automation framework that lets you define your automation tasks using simple YAML playbooks—just like Ansible. Say goodbye to writing repetitive boilerplate code for Selenium or Playwright. Instead, focus on **what** you want to automate, not **how** to code it.
 
 ### Why Use This Framework?
 
-- ✅ **Write Less Code**: Define scraping tasks in YAML instead of hundreds of lines of Python
+- ✅ **Write Less Code**: Define automation tasks in YAML instead of hundreds of lines of Python
 - ✅ **Browser Agnostic**: Switch between Selenium, Playwright, and Puppeteer without changing your playbooks
 - ✅ **Declarative**: Focus on what you want to achieve, not implementation details
 - ✅ **Reusable**: Create playbook templates that work across different projects
-- ✅ **Maintainable**: YAML playbooks are easier to read and modify than traditional scraping code
+- ✅ **Maintainable**: YAML playbooks are easier to read and modify than traditional automation code
 
 ### Comparison
 
@@ -31,7 +31,7 @@ driver = webdriver.Chrome()
 driver.get("https://example.com")
 search_box = driver.find_element(By.CSS_SELECTOR, "input[name='q']")
 search_box.click()
-search_box.send_keys("web scraping")
+search_box.send_keys("browser automation")
 # ... more boilerplate code
 ```
 
@@ -49,7 +49,7 @@ tasks:
   
   - name: Type search query
     action: keyboard.type
-    text: "web scraping"
+    text: "browser automation"
 ```
 
 ## Key Features
@@ -61,7 +61,7 @@ Works seamlessly with multiple browser automation engines. Write your playbooks 
 - **Puppeteer** (coming soon)
 
 ### 📝 YAML Playbooks
-Define scraping tasks using intuitive YAML syntax, inspired by Ansible. No need to write repetitive browser automation code.
+Define automation tasks using intuitive YAML syntax, inspired by Ansible. No need to write repetitive browser automation code.
 
 ### 🔄 Loops & Conditions
 Built-in support for iterations and conditional execution:
@@ -106,7 +106,7 @@ pip install -r requirements.txt  # if requirements.txt exists
 
 ### 1. Create a Playbook
 
-Create a file named `my_scraper.yaml`:
+Create a file named `my_automation.yaml`:
 
 ```yaml
 tasks:
@@ -125,7 +125,7 @@ tasks:
 
   - name: Type search query
     action: keyboard.type
-    text: "web scraping"
+    text: "browser automation"
 ```
 
 ### 2. Run the Playbook
@@ -135,7 +135,7 @@ from scrapping_playbook_framework.worker import Worker, WorkerEngine
 from scrapping_playbook_framework.playbook_reader import from_yaml_file
 
 # Load playbook
-playbook = from_yaml_file("my_scraper.yaml")
+playbook = from_yaml_file("my_automation.yaml")
 
 # Create worker with desired engine
 worker = Worker(playbook, WorkerEngine.SELENIUM)
@@ -287,7 +287,7 @@ Reference variables using the `$` prefix:
   ```yaml
   - name: Type search query
     action: keyboard.type
-    text: "web scraping"
+    text: "browser automation"
   ```
 
 - `keyboard.press` - Press a key
@@ -343,7 +343,7 @@ Check out the `examples/` directory for complete playbook examples:
 
 - **simple_navigation.yaml** - Basic browser navigation
 - **form_filling.yaml** - Form interaction and submission
-- **loop_scraping.yaml** - Extracting data from multiple elements
+- **loop_scraping.yaml** - Processing multiple elements with loops
 - **conditional_tasks.yaml** - Using conditions to handle dynamic content
 
 See [examples/README.md](examples/README.md) for detailed explanations.

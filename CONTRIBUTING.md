@@ -1,6 +1,6 @@
 # Contributing to Scrapping Playbook Framework
 
-Thank you for your interest in contributing to the Scrapping Playbook Framework! We're excited to have you join our community. This project aims to make web scraping accessible and maintainable through declarative YAML playbooks, and your contributions help make that vision a reality.
+Thank you for your interest in contributing to the Scrapping Playbook Framework! We're excited to have you join our community. This project aims to make browser automation accessible and maintainable through declarative YAML playbooks, and your contributions help make that vision a reality.
 
 ## How to Contribute
 
