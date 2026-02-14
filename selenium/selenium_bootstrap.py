@@ -6,6 +6,7 @@ from scrapping_playbook_framework.selenium.selenium_keyboard_task import Seleniu
 from scrapping_playbook_framework.selenium.selenium_scroll_task import SeleniumScrollTask
 from scrapping_playbook_framework.selenium.selenium_wait_task import SeleniumWaitForElementTask, SeleniumWaitTask
 from scrapping_playbook_framework.task.browser_task import DownloadUrl
+from scrapping_playbook_framework.task.export_task import CSVExportTask
 from scrapping_playbook_framework.task.task import ScrappingTask
 from selenium.webdriver.chrome.options import Options
 from selenium import webdriver
@@ -46,8 +47,8 @@ def get_driver() -> WebDriver:
         'https://www.stackoverflow.com',
         'https://www.google.com',
     ]
-    for url in history_urls:
-        driver.get(url)
+    #for url in history_urls:
+    #    driver.get(url)
     
     return driver
 
@@ -68,5 +69,6 @@ def get_selenium_tasks(driver: WebDriver) -> list[ScrappingTask[Any]]:
         SeleniumWaitForElementTask(driver, _get_element_task),
         SeleniumScrollTask(driver),
         SeleniumScreenshotTask(driver),
-        DownloadUrl()
+        DownloadUrl(),
+        CSVExportTask()
     ]

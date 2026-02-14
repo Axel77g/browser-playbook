@@ -18,7 +18,7 @@ class SeleniumDOMElement(DOMElement):
     def get_text(self, ctx: Any) -> str:
         if isinstance(self.web_element, ShadowRoot):
             return ""
-        return self.web_element.text
+        return self.web_element.get_property("innerText") # type: ignore
 
     def get_attribute(self, ctx: DOMElementGetAttributeParams) -> str | None:
         print("Getting attribute:", ctx.get('attribute_name'))
@@ -47,7 +47,7 @@ class SeleniumDOMElement(DOMElement):
         dom = self.web_driver.execute_script("return arguments[0].shadowRoot", self.web_element) # type: ignore
         return SeleniumDOMElement(self.web_driver, dom)
     
-    def getInView(self, ctx: Any) -> None:
+    def get_in_View(self, ctx: Any) -> None:
         # si webelement is ShadowRoot ignore
         if isinstance(self.web_element, ShadowRoot):
             return

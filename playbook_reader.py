@@ -32,7 +32,7 @@ class PlaybookCondition(BaseModel):
             res = res and (float(value) < float(less_than))
         return res
 
-PlaybookTask_ATTRIBUTES = ["name", "action", "output", "when", "map", "tasks", "item_name",'post_process','filters']
+PlaybookTask_ATTRIBUTES = ["name", "action", "output", "when", "map", "tasks", "item_name",'post_process','filters','debug']
 
 class PlaybookTask(BaseModel):
     name: str
@@ -41,10 +41,12 @@ class PlaybookTask(BaseModel):
     when: Optional[list[PlaybookCondition]] = Field(default=[])
     filters : Optional[list[PlaybookCondition]] = Field(default=None)
     # for loops
+    flatten: Optional[bool] = Field(default=False)
     map: Optional[str]  = Field(default=None) # on wich variable to map the tasks
     tasks: Optional[list["PlaybookTask"]] = Field(default=None) # nested tasks for loops 
     item_name: Optional[str] = Field(default="item") # name of the variable for each item in the loop
     post_process: Optional[list[dict[str, Any]]] = Field(default=None) # post processing value before store
+    debug: Optional[bool] = Field(default=False)
 
     class Config:
         extra = 'allow'

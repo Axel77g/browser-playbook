@@ -97,6 +97,13 @@ class RegexReplaceProcessor(PostProcessor):
             value = str(value)
         return self.pattern.sub(self.replacement, value)
 
+class ArrayPluckProcessor(PostProcessor):
+    def __init__(self, key: str):
+        self.key = key
+
+    def process(self, value: list[dict[str, Any]]) -> list[Any]:
+        return [item.get(self.key) for item in value if self.key in item]
+
 # Factory pour créer les processors
 class PostProcessorFactory:
     @staticmethod
@@ -133,5 +140,7 @@ class PostProcessorFactory:
             )
         elif processor_type == 'slugify':
             return SlugifyProcessor()
+        elif processor_type == 'pluck_array':
+            return ArrayPluckProcessor(key=config['key'])
         else:
             raise ValueError(f"Unknown processor type: {processor_type}")

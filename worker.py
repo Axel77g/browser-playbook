@@ -3,6 +3,7 @@ import logging
 from typing import Any
 
 from scrapping_playbook_framework.core.post_processor import PostProcessorFactory
+from scrapping_playbook_framework.lib import value_resolver
 from scrapping_playbook_framework.lib.chronos import Chronos
 from scrapping_playbook_framework.playbook_reader import PlaybookDict, PlaybookTask, PlaybookTask_ATTRIBUTES
 from scrapping_playbook_framework.task.task import ScrappingTask
@@ -127,12 +128,13 @@ class Worker:
                     task_name = task_dict.name
                     task_action = task_dict.action
                     task_conditions = task_dict.when or []
-                    #if need_break:
-                    #    breakpoint()
-                    # Update the context with task variables
                     params = {k: v for k, v in task_dict.model_dump().items() if k not in PlaybookTask_ATTRIBUTES}
                     params = replace_variable_placeholders(params, context)
                     context.inject_variables(params)
+
+                    if(task_dict.debug):
+                        logging.info(f"Debugging task {task_dict.name} - Start Point")
+                        breakpoint()
 
                     # Evaluate conditions
                     conditions_met = len(task_conditions) == 0 or all(condition.evaluate(context) for condition in task_conditions)
@@ -143,14 +145,19 @@ class Worker:
                     output = None
                     
                     if task_dict.map is not None and task_dict.tasks is not None:
+                        """
+                        A Map loop create a subcontext, all var created in the loop is in a sub context, the result can be outputed
+                        """
                         list_to_map = context.get_variable(task_dict.map)
 
                         if not isinstance(list_to_map, list):
                             raise ValueError(f"Variable to map is not a list: {task_dict.map}")
                         logging.debug(f"Mapping over list: {len(list_to_map)} items for task {task_name}") # type: ignore
                         output= []
-                        #need_break = task_dict.name == 'loop-on-links'
                         for index, item in enumerate(list_to_map): # type: ignore
+                            if(task_dict.debug):
+                                logging.info(f"Debugging task {task_dict.name} - Iteration {index}")
+                                breakpoint()
                             sub_context = context.clone()
                             sub_context.set_variable('INDEX',index)
                             sub_context.set_variable(task_dict.item_name or "item", item)
@@ -159,7 +166,11 @@ class Worker:
                                     continue
 
                             outputs_from_sub = worker_loop(task_dict.tasks, sub_context, tasks_availables_dict)
-                            output.append(outputs_from_sub) # type: ignore
+                            if(task_dict.flatten): # type:ignore
+                                output = None
+                                outputs.update(outputs_from_sub) # type: ignore
+                            else:
+                                output.append(outputs_from_sub) # type: ignore
                     else :  
                         logging.debug(f"Invoking task {task_name} with action {task_action}")
                         invoker = TaskInvoker(task_name, task_action, context, tasks_availables_dict)
@@ -168,12 +179,16 @@ class Worker:
 
                     if task_dict.post_process is not None and output is not None:
                         output = apply_post_processors(output, task_dict.post_process)
-                    logging.info(f"Task {task_name} output: {output}")
-                    task_output_var_name = task_dict.output
+                    
+                    task_output_var_name = value_resolver.resolve(context, task_dict.output)
                     if task_output_var_name and output is not None:
                         context.set_variable(task_output_var_name, output)
                         if(not task_output_var_name.startswith('_')):
                             outputs[task_output_var_name] = output
+
+                    if(task_dict.debug):
+                        logging.info(f"Debugging task {task_dict.name} - End Point")
+                        breakpoint()
 
                 logging.info(f"Finished task {task_name} in {chrono.elapsed_time:.2f}s")
 
